@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import axiosInstance from '../lib/axios.js';
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.VITE_SOCKET_URL;
+const BASE_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3232";
 
 const useAuthStore = create((set, get) => ({
     authUser: null,
