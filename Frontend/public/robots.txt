@@ -1,0 +1,7 @@
+# Prevent search engines from indexing private user chat pages
+User-agent: *
+Disallow: /
+
+# Allow Google Search Console verification
+Allow: /robots.txt
+Sitemap: https://YOUR_DOMAIN/sitemap.xml
