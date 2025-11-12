@@ -16,22 +16,23 @@ const port = process.env.PORT || 3232;
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chatter-stack.vercel.app",
-  "https://chatterstack-production.up.railway.app",
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed for this origin: " + origin));
-    }
-  },
-  credentials: true,
-};
+//  Configure CORS
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed for this origin: " + origin));
+      }
+    },
+    credentials: true, // send/receive cookies
+  })
+);
 
-// Apply CORS middleware before routes
-app.use(cors(corsOptions));
 
 // Parse cookies and JSON
 app.use(express.json());
@@ -50,5 +51,5 @@ app.use("/api/message", messageRouter);
 // Start server
 server.listen(port, () => {
   connectDB();
-  console.log(`🚀 Server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });

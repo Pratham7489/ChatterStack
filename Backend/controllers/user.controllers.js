@@ -3,20 +3,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import coludinary from "../config/cloudinary.js"
 
-const generateToken = (res, user) =>{
+const generateToken = (res, user) => {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "5y",
+  });
 
-    const token = jwt.sign({_id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "5y",
-    });
-
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 5 * 365 * 24 * 60 * 60 * 1000,
-    });
-
-}; 
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // must be true on Railway
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 5 * 365 * 24 * 60 * 60 * 1000, // 5 years
+  });
+};
 export const registerUser = async (req , res) => {
     try{
         const { username, email , password } = req.body;
