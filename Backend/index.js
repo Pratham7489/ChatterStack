@@ -10,37 +10,45 @@ import messageRouter from "./routes/message.routes.js";
 import connectDB from "./config/conn.js";
 import { server, app } from "./config/socket.js";
 
-
 const port = process.env.PORT || 3232;
 
+// Allow only frontend and backend URLs
 const allowedOrigins = [
-  process.env.CLIENT_URL,        // This should be https://chatter-stack.vercel.app
+  "http://localhost:5173",
+  "https://chatter-stack.vercel.app",
   "https://chatterstack-production.up.railway.app",
-  "http://localhost:5173"
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed for this origin: " + origin));
+    }
+  },
   credentials: true,
-}));
+};
 
-
-
-// middleware
+// Apply CORS middleware before routes
 app.use(cors(corsOptions));
+
+// Parse cookies and JSON
 app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+// Default route
+app.get("/", (req, res) => {
+  res.send("ChatterStack backend is running!");
 });
 
-// Routers
+// API routes
 app.use("/api/user", userRouter);
 app.use("/api/message", messageRouter);
 
+// Start server
 server.listen(port, () => {
   connectDB();
-  console.log(`app listening on port ${port}`);
+  console.log(`🚀 Server listening on port ${port}`);
 });
