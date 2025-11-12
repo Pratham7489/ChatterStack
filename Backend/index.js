@@ -14,14 +14,16 @@ import { server, app } from "./config/socket.js";
 const port = process.env.PORT || 3232;
 
 const allowedOrigins = [
-  process.env.CLIENT_URL,          // Frontend production (Vercel)
-  "http://localhost:5173"          // For local development
+  process.env.CLIENT_URL,        // This should be https://chatter-stack.vercel.app
+  "https://chatterstack-production.up.railway.app",
+  "http://localhost:5173"
 ];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
+
 
 
 // middleware
