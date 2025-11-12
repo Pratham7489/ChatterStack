@@ -105,10 +105,10 @@ const useAuthStore = create((set, get) => ({
 
         // Create socket connection with userId in query
         const  newSocket = io(BASE_URL, {
-            query: {
-                userId: authUser?._id
-            },
+            query: { userId: authUser?._id },
             transports: ["websocket"],
+            withCredentials: true, 
+            secure: true,
         });
         
         // Listen for connection
