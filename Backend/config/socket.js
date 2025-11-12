@@ -5,11 +5,25 @@ import express from 'express'
 const app = express();
 const server = http.createServer(app);
 
+// Allowed origins (local + production)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chatter-stack.vercel.app",
+  "https://chatterstack-production.up.railway.app",
+];
+
 const io = new Server(server , {
-    cors:{
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
-        credentials: true,
-    },     
+    cors: {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("Blocked socket origin:", origin);
+        callback(new Error("CORS not allowed for this origin: " + origin));
+      }
+    },
+    credentials: true,
+  },     
 });
 
 // Store online users
@@ -32,6 +46,7 @@ io.on('connection', (socket) => {
         io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
     }
 
+    //  Handle disconnect
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
    
