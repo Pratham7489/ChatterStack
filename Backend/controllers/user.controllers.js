@@ -46,10 +46,17 @@ export const registerUser = async (req , res) => {
 
         generateToken(res, user);
         const {password: pass, ...rest} = user._doc;
+        const token = jwt.sign(
+          { id: user._id },
+          process.env.JWT_SECRET,
+          { expiresIn: "5y" }
+        );
+
         res.json({
             success: true,
             message: "User resgistered Successfully!",
             user: rest,
+            token: token,
         });
 
     } catch (error){
@@ -88,10 +95,17 @@ export const loginUser = async (req , res) => {
 
         const { password: pass, ...rest } = user._doc;
         generateToken(res, user);
+        const token = jwt.sign(
+          { _id: user._id },
+            process.env.JWT_SECRET,
+          { expiresIn: "5y" }
+        );
+
         res.json({
             success: true,
             message: "User login Successfully!",
             user: rest,
+            token: token,
         });
 
     } catch (error){

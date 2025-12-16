@@ -1,6 +1,8 @@
 import http from 'http'
 import { Server } from 'socket.io'
 import express from 'express'
+import jwt from "jsonwebtoken"
+import { Socket } from 'dgram';
 
 const app = express();
 const server = http.createServer(app);
@@ -34,32 +36,34 @@ export const getRecieverSocketId = (userId) => {
 };
 
 io.on('connection', (socket) => {
-    console.log("User connected:", socket.id);
+  try {
+    const token = socket.handshake.auth?.token;
 
-    // Store user when they connect
-    const userId = socket.handshake.query.userId;
-    if (userId && userId !== "undefined") {
-        onlineUsers.set(userId, socket.id);
-        console.log("User registered:", userId, "Socket:", socket.id);
-
-        // Emit updated online users to all clients
-        io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
+    if (!token) {
+      console.log("Socket rejected: No token");
+      socket.disconnect();
+      return;
     }
 
-    //  Handle disconnect
-    socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
-   
-       
-        // Remove user from online users
-        if (userId && userId !== "undefined") {
-            onlineUsers.delete(userId);
-            console.log("User removed:", userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded._id.toString();
 
-            // Emit updated online users to all clients
-            io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
-        }
-    });    
+    onlineUsers.set(userId, socket.id);
+    console.log("User connected:", userId, socket.id);
+
+    io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
+
+    socket.on("disconnect", () => {
+      onlineUsers.delete(userId);
+      console.log("User disconnected:", userId);
+
+      io.emit("getOnlineUsers", Array.from(onlineUsers.keys()));
+    });
+
+  } catch (error) {
+    console.log("Socket auth failed:", error.message);
+    socket.disconnect();
+  }  
 });
 
 export { app, io, server, onlineUsers };

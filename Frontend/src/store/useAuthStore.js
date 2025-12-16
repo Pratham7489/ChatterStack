@@ -32,6 +32,11 @@ const useAuthStore = create((set, get) => ({
         set({ isSigningUp: true });
         try {
             const { data } = await axiosInstance.post("/user/register", userData);
+
+            if (data?.token) {
+                localStorage.setItem("token", data.token);
+            }
+
             set({ authUser: data?.user, isAuthenticated: true });
             get().connectSocket();
             toast.success(data?.message || "Registered Successfully");
@@ -45,9 +50,15 @@ const useAuthStore = create((set, get) => ({
         set({ isLoginingUp: true });
         try {
             const { data } = await axiosInstance.post("/user/login", userData);
+
+            if (data?.token) {
+                localStorage.setItem("token", data.token);
+            }
+
             set({ authUser: data?.user, isAuthenticated: true });
             get().connectSocket();
             toast.success(data?.message || "Logged in Successfully");
+
         } catch (error) {
             toast.error(error?.response?.data?.message || "Error in login");
         } finally {
@@ -58,6 +69,8 @@ const useAuthStore = create((set, get) => ({
         try {
             get().disconnectSocket();
             await axiosInstance.get("/user/logout");
+
+            localStorage.removeItem("token");
 
             // Clear user session
             set({ authUser: null, isAuthenticated: false, socket: null  });
@@ -110,13 +123,13 @@ const useAuthStore = create((set, get) => ({
 
         console.log('Connecting socket for user:', authUser._id);
 
-
+        const token = localStorage.getItem("token");
         // Create socket connection with userId in query
         const  newSocket = io(BASE_URL, {
-            query: { userId: authUser?._id },
+            auth: {
+                token : token,
+            },
             transports: ["websocket"],
-            withCredentials: true, 
-            secure: true,
         });
         
         // Listen for connection
