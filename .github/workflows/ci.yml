@@ -33,6 +33,15 @@ jobs:
       working-directory: ./Backend
       run: npm ci
 
+    - name: Create backend .env file
+      working-directory: ./Backend
+      run: |
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> .env
+        echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+        echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+        echo "PORT=${{ secrets.PORT }}" >> .env
+
     - name: Run backend tests
       working-directory: ./Backend
       run: npm test --if-present
@@ -41,6 +50,12 @@ jobs:
     - name: Install frontend dependencies
       working-directory: ./Frontend
       run: npm ci
+      
+    - name: Create frontend .env file
+      working-directory: ./Frontend
+      run: |
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+        echo "VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }}" >> .env   
 
     - name: Build frontend
       working-directory: ./Frontend
