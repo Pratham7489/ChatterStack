@@ -41,6 +41,7 @@ jobs:
         echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
         echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
+        echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
 
     - name: Run backend tests
       working-directory: ./Backend
