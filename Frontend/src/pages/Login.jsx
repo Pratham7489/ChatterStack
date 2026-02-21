@@ -97,7 +97,7 @@ const Login = () => {
                     </div>
                     <h1 className="text-3xl font-extrabold text-white mb-2">Connect with Friends!</h1>
                     <p className="text-gray-200 text-lg font-light">Discover, share
-                    and connect with people all over the world.</p>
+                    and connect 💞 with people all over the world 🌍</p>
                 </div>
             </div>
             {/* Right side */}
