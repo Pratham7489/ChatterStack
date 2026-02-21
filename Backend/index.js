@@ -42,6 +42,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Default route
 app.get("/", (req, res) => {
   res.send("ChatterStack backend is running!");
+  console.log("test");
 });
 
 // API routes
