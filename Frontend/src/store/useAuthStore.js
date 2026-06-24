@@ -20,6 +20,12 @@ const useAuthStore = create((set, get) => ({
         set({ loading: true });
         try {
             const { data } = await axiosInstance.get("/user/profile");
+
+            // Save the token if the backend provides it
+            if (data?.token) {
+                localStorage.setItem("token", data.token);
+            }
+
             set({ authUser: data?.user, isAuthenticated: true });
             get().connectSocket();
         } catch (error) {

@@ -134,9 +134,14 @@ export const profileUser = async (req, res) => {
                 message: "User not found!"
             });
         }
+
+        // Generate the token again, if user is already loggedin
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "5y" });
+
         res.status(200).json({
             succes:true,
             user,
+            token,
         });
 
     } catch (error) {
