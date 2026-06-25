@@ -84,31 +84,46 @@ const useChatStore = create((set, get) => ({
         }
     },
 
-    deleteMessages: async (ids) => {
-        try {
-          const { data } = await axiosInstance.delete(`/message/bulk`, { data: { messageIds: ids } });
-          set(state => ({
-            messages: state.messages.filter(m => !data.deletedIds.includes(m._id))
-          }));
-        } catch (e) {
-          toast.error(e?.response?.data?.message || "Delete failed");
-        }
-    },
+    // deleteMessages: async (ids) => {
+    //     try {
+    //       const { data } = await axiosInstance.delete(`/message/bulk`, { data: { messageIds: ids } });
+    //       set(state => ({
+    //         messages: state.messages.filter(m => !data.deletedIds.includes(m._id))
+    //       }));
+    //     } catch (e) {
+    //       toast.error(e?.response?.data?.message || "Delete failed");
+    //     }
+    // },
 
+
+    // deleteMessages: async (messageIds) => {
+    //     try {
+    //       await axiosInstance.delete('/message/delete', { data: { messageIds } });
+
+    //       // Update messages state to remove deleted ones
+    //       set(state => ({
+    //         messages: state.messages.filter(m => !messageIds.includes(m._id))
+    //       }));
+
+    //       toast.success("Message deleted");
+    //     } catch (error) {
+    //       console.error('Delete failed:', error);
+    //       toast.error("Failed to delete messages");
+    //     }
+    // },
 
     deleteMessages: async (messageIds) => {
         try {
-          await axiosInstance.delete('/message/delete', { data: { messageIds } });
-
-          // Update messages state to remove deleted ones
-          set(state => ({
-            messages: state.messages.filter(m => !messageIds.includes(m._id))
-          }));
-
-          toast.success("Message deleted");
+            const { data } = await axiosInstance.delete(`/message/bulk`, { 
+                data: { messageIds } 
+            });
+            set(state => ({
+                messages: state.messages.filter(m => !data.deletedIds.includes(m._id))
+            }));
+            toast.success("Messages deleted");
         } catch (error) {
-          console.error('Delete failed:', error);
-          toast.error("Failed to delete messages");
+            console.error('Delete failed:', error);
+            toast.error(error?.response?.data?.message || "Failed to delete messages");
         }
     },
 
@@ -175,7 +190,9 @@ const useChatStore = create((set, get) => ({
         const socket = useAuthStore.getState().socket;
         if (socket) {
             socket.off("newMessage");
-            console.log("Unsubscribed from messages");
+            socket.off("messagesDeleted");
+            socket.off("messageUpdated");
+            console.log("Unsubscribed from all message events");
         }
     },
 

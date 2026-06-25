@@ -135,7 +135,7 @@ const useAuthStore = create((set, get) => ({
             auth: {
                 token : token,
             },
-            transports: ["websocket"],
+            // transports: ["websocket"],
         });
         
         // Listen for connection
