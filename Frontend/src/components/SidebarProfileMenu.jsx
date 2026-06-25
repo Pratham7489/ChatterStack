@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useChatStore from '../store/useChatStore'
+import { UserPlus, Settings, User, LogOut } from 'lucide-react' 
+import toast from 'react-hot-toast'
 
 const SidebarProfileMenu = ({
     toggleProfileBox, 
@@ -42,6 +44,34 @@ const SidebarProfileMenu = ({
         navigate('/login')
     }
 
+    // Handle Invite Logic
+    const handleInvite = async () => {
+        const inviteLink = "https://chatter-stack.vercel.app/register"; 
+        const shareData = {
+            title: 'Join me on ChatterStack',
+            text: 'Hey! I am using ChatterStack to chat. Create an account and let\'s talk!',
+            url: inviteLink
+        };
+
+        if (navigator.share && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+            } catch (error) {
+                console.log("Share cancelled or failed", error);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(inviteLink);
+                toast.success("Invite link copied to clipboard!");
+            } catch (error) {
+                toast.error("Failed to copy link.");
+            }
+        }
+
+        // Close the menu after they click the invite button
+        setToggleProfileBox(false);
+    };
+
     if (!visible) return null  
 
     return (
@@ -55,30 +85,47 @@ const SidebarProfileMenu = ({
             <li>
                 <Link 
                     to="/settings" 
-                    className='hover:bg-gray-200 rounded px-2 py-1'
-                    onClick={() => setToggleProfileBox(false)} >Settings
+                    className='flex items-center justify-between hover:bg-gray-200 rounded px-2 py-1 w-full text-left text-gray-700'
+                    onClick={() => setToggleProfileBox(false)} 
+                >
+                    <span>Settings</span>
+                    <Settings size={16} className="text-gray-700" />
                 </Link>
             </li>
+
             <li>
                 <button 
-                    className='hover:bg-gray-200 rounded px-2 py-1'
+                    className='flex items-center justify-between hover:bg-gray-200 rounded px-2 py-1 w-full text-left text-gray-700'
                     onClick={() => {
                         setToggleProfileBox(false);
                         navigate("/profile");
                     }} 
                 >
-                    Profile
+                    <span>Profile</span>
+                    <User size={16} className="text-gray-700" />
                 </button>
             </li>
+
             <li>
                 <button 
-                    className='hover:bg-gray-200 rounded px-2 py-1 text-red-400'
+                    className='flex items-center justify-between hover:bg-gray-200 rounded px-2 py-1 w-full text-left text-gray-700'
+                    onClick={handleInvite} 
+                >
+                    <span>Invite a Friend</span>
+                    <UserPlus size={16} className="text-gray-700" />
+                </button>
+            </li>
+
+            <li>
+                <button 
+                    className='flex items-center justify-between hover:bg-gray-200 rounded px-2 py-1 w-full text-left text-red-500 font-medium'
                     onClick={() => {
                         handleLogout()
                         setToggleProfileBox(false)
                     }} 
                 >
-                    Logout
+                    <span>Logout</span>
+                    <LogOut size={16} className="text-red-500" />
                 </button>
             </li>
 
