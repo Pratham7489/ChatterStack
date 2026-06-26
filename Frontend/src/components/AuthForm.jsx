@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import useKeyboardAvoidance from "../hooks/useKeyboardAvoidance";
-import { Mail, Lock, User, ArrowLeft } from "lucide-react"
+import { Mail, Lock, User, ArrowLeft, Share2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchView }) =>
 {    
@@ -8,6 +9,31 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
     const passRef = useRef(null);
     useKeyboardAvoidance(emailRef);
     useKeyboardAvoidance(passRef);
+
+    // Sharing Logic
+    const handleInvite = async () => {
+        const inviteLink = "https://chatter-stack.vercel.app/register"; 
+        const shareData = {
+            title: 'Join me on ChatterStack',
+            text: 'Hey! I am using ChatterStack to chat. Create an account and let\'s talk!',
+            url: inviteLink
+        };
+
+        if (navigator.share && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+            } catch (error) {
+                console.log("Share cancelled or failed", error);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(inviteLink);
+                toast.success("Invite link copied to clipboard!");
+            } catch (error) {
+                toast.error("Failed to copy link.");
+            }
+        }
+    };
 
     const renderLoginForm = () => 
         <>
@@ -34,8 +60,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                         }
                     />
                 </div>
-                <p className="text-red-500 text-xs mt-1 ml-1 h-4">{errors.email || ''}
-                </p>
+                <p className="text-red-500 text-xs mt-1 ml-1 h-4">{errors.email || ''} </p>
             </div>
             {/*Password*/}
             <div className="mb-6">
@@ -183,9 +208,22 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
     };
 
     return (
-        <form onSubmit={handleSubmit} className="w-full relative">
-            {renderForm()}
-        </form>
+        <>
+            {/* Floating Share Button (Outside the main form card) */}
+            <button
+                type="button" 
+                onClick={handleInvite}
+                className="fixed top-4 right-4 sm:top-6 sm:right-6 p-2 md:px-2 md:py-2 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 rounded-full flex items-center gap-2 shadow-lg transition-all duration-300 z-50 group border border-gray-700 focus:outline-none"
+                title="Share App"
+            >
+                <Share2 size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="hidden md:inline text-sm font-medium">Share App</span>
+            </button>
+
+            <form onSubmit={handleSubmit} className="w-full relative">
+                {renderForm()}
+            </form>
+        </>
     );
 }
 
