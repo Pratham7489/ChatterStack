@@ -118,8 +118,26 @@ export const loginUser = async (req , res) => {
 };
 
 export const logoutUser = async (req, res) => {
-    res.clearCookie("token");
-    res.json({ message: "logged out successfully"});
+    try {
+        // Cookie ko blank value aur expire date ke sath overwrite kar rahe hain
+        res.cookie("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            expires: new Date(0), // Yeh browser ko force karega cookie turant delete karne ke liye
+        });
+
+        return res.status(200).json({ 
+            success: true, 
+            message: "Logged out successfully" 
+        });
+        
+    } catch (error) {
+        return res.status(500).json({ 
+            success: false, 
+            message: "Error during logout" 
+        });
+    }
 }; 
 
 export const profileUser = async (req, res) => {

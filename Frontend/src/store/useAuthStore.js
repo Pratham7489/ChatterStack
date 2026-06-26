@@ -72,22 +72,25 @@ const useAuthStore = create((set, get) => ({
         }
     },
     logoutAuth: async () => {
+        // Sabse pehle local data aur token ko instantly delete karo
+        localStorage.removeItem("token");
+        
+        // Reset chat store
+        const chatStore = useChatStore.getState();
+        chatStore.setSelectedUser(null);
+
+        // Clear user session state
+        set({ authUser: null, isAuthenticated: false, socket: null });
+
         try {
+            // Socket disconnect karo aur phir backend ko cookie clear karne bolo
             get().disconnectSocket();
             await axiosInstance.get("/user/logout");
-
-            localStorage.removeItem("token");
-
-            // Clear user session
-            set({ authUser: null, isAuthenticated: false, socket: null  });
-
-            // Reset chat store 
-            const chatStore = useChatStore.getState();
-            chatStore.setSelectedUser(null);
-
+            
             toast.success("Logged out Successfully"); 
         } catch (error) {
-            toast.error(error?.response?.data?.message || "Error in logout");
+            // Agar backend api fail bhi ho jaye, frontend se session wipe out ho chuka hai
+            console.log("Backend logout cookie clearing error:", error);
         }
     },
     updateProfileImage: async (userData) => {
