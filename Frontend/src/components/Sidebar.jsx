@@ -17,11 +17,16 @@ const Sidebar = () => {
   const { authUser, logoutAuth, onlineUsers } = useAuthStore(); 
   const { getUsers, users, selectedUser, setSelectedUser } = useChatStore();
 
-  const filteredUsers = showOnlineUsers 
-    ? users?.filter((user) => onlineUsers?.includes(user?._id)) 
-    : users;
+ // Asli online count nikalne ke liye apne aapko (authUser) list se bahar nikal do
+  const exactOnlineUsers = onlineUsers?.filter((id) => id !== authUser?._id) || [];
+  
+  // Ab jo length bachi, wo 100% correct "other online users" ki hai
+  const onlineCount = exactOnlineUsers.length;
 
-  const onlineCount = onlineUsers?.length > 0 ? onlineUsers.length - 1 : 0;
+  // Jab "Online only" checkbox tick ho, toh sirf exactOnlineUsers ko dikhao
+  const filteredUsers = showOnlineUsers 
+    ? users?.filter((user) => exactOnlineUsers.includes(user?._id)) 
+    : users;
 
   // load all users
   useEffect(() => {

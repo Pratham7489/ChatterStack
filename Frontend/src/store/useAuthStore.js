@@ -138,7 +138,6 @@ const useAuthStore = create((set, get) => ({
             auth: {
                 token : token,
             },
-            // transports: ["websocket"],
         });
         
         // Listen for connection
@@ -154,6 +153,21 @@ const useAuthStore = create((set, get) => ({
         // Listen for online users updates 
         newSocket.on('getOnlineUsers', (users) => {
             set({ onlineUsers: users });
+        });
+
+        // Agar koi naya user app par register karta hai
+        newSocket.on('newUserRegistered', (newUser) => {
+            const chatStore = useChatStore.getState();
+
+           if (chatStore.users) {
+                // Check karein ki user pehle se list me toh nahi hai
+                const userAlreadyExists = chatStore.users.find((u) => u._id === newUser._id);
+                
+                if (!userAlreadyExists) {
+                    // Naye user ko sidebar ki list me turant add kar do
+                    useChatStore.setState({ users: [...chatStore.users, newUser] });
+                }
+            }
         });
 
         set({ socket: newSocket });

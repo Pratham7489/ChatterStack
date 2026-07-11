@@ -48,16 +48,20 @@ io.on('connection', (socket) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded._id.toString();
 
+   // User connect hone par map me latest socket.id set karo
     onlineUsers.set(userId, socket.id);
     console.log("User connected:", userId, socket.id);
 
     io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
 
     socket.on("disconnect", () => {
-      onlineUsers.delete(userId);
-      console.log("User disconnected:", userId);
-
-      io.emit("getOnlineUsers", Array.from(onlineUsers.keys()));
+      if (onlineUsers.get(userId) === socket.id) {
+        onlineUsers.delete(userId);
+        console.log("User completely disconnected:", userId);
+        io.emit("getOnlineUsers", Array.from(onlineUsers.keys()));
+      } else {
+        console.log("Old/Stale tab closed for user:", userId);
+      }
     });
 
   } catch (error) {

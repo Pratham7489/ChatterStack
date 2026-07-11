@@ -30,6 +30,10 @@ const messageSchema = new mongoose.Schema(
            type: Date,
            default: null,
         },
+        deletedBy: [{
+           type: mongoose.Schema.Types.ObjectId,
+           ref: "User",
+        }],
     },
     {
         timestamps: true,

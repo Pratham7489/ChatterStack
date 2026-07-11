@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import coludinary from "../config/cloudinary.js"
+import coludinary from "../config/cloudinary.js";
+import { io } from "../config/socket.js";
 
 const generateToken = (res, user) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -42,28 +43,39 @@ export const registerUser = async (req , res) => {
             password: hasedPassword,
         });
 
+        // 1. User Database me Save ho gaya
         const user = await updateData.save();
 
         generateToken(res, user);
-        const {password: pass, ...rest} = user._doc;
+
+        // 2. Data ko safely Mongoose object se Plain JS Object me convert kiya
+        const userObj = user.toObject();
+        delete userObj.password;
+
+        // const {password: pass, ...rest} = user._doc;
         const token = jwt.sign(
           { _id: user._id },
           process.env.JWT_SECRET,
           { expiresIn: "5y" }
         );
 
+        // Baaki online users ko batao ki naya user aaya hai
+        if (io) {
+            io.emit("newUserRegistered", userObj);
+        }
+
         res.json({
             success: true,
             message: "User resgistered Successfully!",
-            user: rest,
+            user: userObj,
             token: token,
         });
 
-    } catch (error){
-        res.json({
+    } catch (error) {
+        res.status(500).json({
             success: false,
             message: "Error with registration!",
-            error,
+            error: error.message,
         });
     }
 };

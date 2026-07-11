@@ -112,7 +112,9 @@ export const getMessages = async (req, res) => {
             $or: [
                 { senderId: senderId, receiverId: receiverId },
                 { senderId: receiverId, receiverId: senderId },
-            ]
+            ],
+            // Wo messages fetch mat karo jo is user ne delete kar diye hain
+            deletedBy: { $ne: senderId }
         }).sort({ createdAt: 1 });
 
         res.status(200).json({
@@ -124,7 +126,7 @@ export const getMessages = async (req, res) => {
             success: false,
             message: "Error with getting user messages" + error,
         });
-    }
+    };
 };
 
 export const deleteMessages = async (req, res) => {
@@ -136,17 +138,21 @@ export const deleteMessages = async (req, res) => {
       return res.status(400).json({ success: false, message: "messageIds required" });
     }
 
-    // Delete only messages that belong to the logged-in user (senderId)
-    await Message.deleteMany({
-      _id: { $in: messageIds },
-      senderId: userId
-    });
+    // Delete ki jagah sirf deletedBy array me userId add karo
+    await Message.updateMany(
+      { _id: { $in: messageIds } },
+      { $addToSet: { deletedBy: userId } }
+    );
+
+    // Socket emit sirf current user ko taaki UI se message hat jaye
+    const mySocket = getRecieverSocketId(userId);
+    if (mySocket) io.to(mySocket).emit("messagesDeleted", messageIds);
 
     return res.status(200).json({
       success: true,
       message: "Messages deleted successfully"
     });
-
+    
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, message: "Delete failed" });
@@ -188,35 +194,25 @@ export const updateMessage = async (req, res) => {
 // DELETE /api/message/bulk  (delete many by ids — only sender’s messages will be removed)
 export const deleteMessagesBulk = async (req, res) => {
   try {
-    const { messageIds } = req.body;              // array of ids
+    const { messageIds } = req.body;             
     const userId = req.user?._id;
 
     if (!Array.isArray(messageIds) || messageIds.length === 0) {
       return res.status(400).json({ success:false, message:"messageIds required" });
     }
 
-    // Only delete messages sent by the current user
-    const toDelete = await Message.find({ _id: { $in: messageIds }, senderId: userId });
-    if (!toDelete.length) {
-      return res.json({ success:true, deletedIds: [] });
-    }
+    // Message udana nahi hai, bas deletedBy list me is user ka ID daalna hai (chahe sender ho ya receiver)
+    await Message.updateMany(
+        { _id: { $in: messageIds } },
+        { $addToSet: { deletedBy: userId } }
+    );
 
-    const deletedIds = toDelete.map(m => m._id.toString());
-    await Message.deleteMany({ _id: { $in: deletedIds } });
-
-    // realtime notify both sides
-    // We notify by conversation, so emit to each counterpart as well.
-    const counterpartIds = [...new Set(toDelete.map(m => m.receiverId.toString()))];
+    // Real-time update SIRF us user ko bhejo jisne delete dabaya hai (dono ko nahi)
     const mySocket = getRecieverSocketId(userId.toString());
-    counterpartIds.forEach(rid => {
-      const other = getRecieverSocketId(rid);
-      if (other) io.to(other).emit("messagesDeleted", deletedIds);
-    });
-    if (mySocket) io.to(mySocket).emit("messagesDeleted", deletedIds);
+    if (mySocket) io.to(mySocket).emit("messagesDeleted", messageIds);
 
-    res.json({ success:true, deletedIds });
+   res.json({ success:true, deletedIds: messageIds });
   } catch (err) {
     res.status(500).json({ success:false, message:"Bulk delete failed: " + err });
   }
 };
-
