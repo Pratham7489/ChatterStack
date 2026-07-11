@@ -6,7 +6,8 @@ import {
     profileUser, 
     registerUser, 
     updateprofile, 
-    updateprofileImage 
+    updateprofileImage,
+    deleteAccount
 } from "../controllers/user.controllers.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import uploadToCloudinary from "../middleware/cloudinaryUpload.js";
@@ -26,5 +27,7 @@ userRouter.post(
     uploadToCloudinary.single("profileImage") , 
     updateprofileImage,
 );
+
+userRouter.delete("/delete-account", authMiddleware, deleteAccount);
 
 export default userRouter;

@@ -13,6 +13,7 @@ const useAuthStore = create((set, get) => ({
     isSigningUp: false,
     isLoginingUp: false,
     isUpdateProfile: false,
+    isDeletingAccount: false,
     socket:null,
     onlineUsers: [],
     
@@ -93,6 +94,34 @@ const useAuthStore = create((set, get) => ({
             console.log("Backend logout cookie clearing error:", error);
         }
     },
+    deleteAccountAuth: async () => {
+        set({ isDeletingAccount: true });
+        try {
+            const { data } = await axiosInstance.delete("/user/delete-account");
+            
+            // Remove Token
+            localStorage.removeItem("token");
+            
+            // Clear Chat Store
+            const chatStore = useChatStore.getState();
+            chatStore.setSelectedUser(null);
+            
+            // Disconnect Socket
+            get().disconnectSocket();
+            
+            // Clear Auth State
+            set({ authUser: null, isAuthenticated: false, socket: null });
+            
+            toast.success(data?.message || "Account deleted successfully");
+            return true; // Return true taaki component redirect kar sake
+
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Error deleting account");
+            return false;
+        } finally {
+            set({ isDeletingAccount: false });
+        }
+    },
     updateProfileImage: async (userData) => {
         set({ isUpdateProfile: true });
         try {
@@ -167,6 +196,32 @@ const useAuthStore = create((set, get) => ({
                     // Naye user ko sidebar ki list me turant add kar do
                     useChatStore.setState({ users: [...chatStore.users, newUser] });
                 }
+            }
+        });
+
+        // NAYA CODE: Agar koi user account delete karta hai
+        newSocket.on('userAnonymized', (anonymizedData) => {
+            const chatStore = useChatStore.getState();
+            
+            // Agar delete hone wala user abhi chat me open hai, toh uska naam instantly change karo
+            if (chatStore.selectedUser?._id === anonymizedData.userId) {
+                chatStore.setSelectedUser({
+                    ...chatStore.selectedUser,
+                    username: anonymizedData.username,
+                    profileImage: anonymizedData.profileImage
+                });
+                toast.error("This user just deleted their account.");
+            }
+
+            // Sidebar ki list mein bhi instantly naam update kar do
+            if (chatStore.users && chatStore.users.length > 0) {
+                useChatStore.setState({ 
+                    users: chatStore.users.map((u) => 
+                        u._id === anonymizedData.userId 
+                        ? { ...u, username: anonymizedData.username, profileImage: anonymizedData.profileImage } 
+                        : u
+                    ) 
+                });
             }
         });
 

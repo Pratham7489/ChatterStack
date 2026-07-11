@@ -5,7 +5,7 @@ import useChatStore from "../store/useChatStore";
 import useKeyboardAvoidance from "../hooks/useKeyboardAvoidance";
 
 const ChatInput = () => {
-    const { sendMessage } = useChatStore();
+    const { sendMessage, selectedUser } = useChatStore();
 
     const [message, setMessage] = useState("");
     const [file, setFile] = useState(null);
@@ -56,6 +56,17 @@ const ChatInput = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
+  // Agar user deleted hai, toh input box ki jagah ek clean message dikhao
+  if (selectedUser?.username === "Deleted User") {
+    return (
+      <div className="p-4 bg-gray-900 border-t border-white/10 text-center">
+        <p className="text-gray-400 text-sm italic bg-gray-800 py-2 px-4 rounded-full inline-block">
+          🚫 You cannot reply to a deleted user.
+        </p>
+      </div>
+    );
+  }
+
     return (    
         <div className='sticky bottom-0 left-0 right-0 bg-gray-800 px-2 sm:px-4 py-2 border-t border-gray-700'>
             {/* File Preview */}
@@ -88,7 +99,7 @@ const ChatInput = () => {
             {/* Input Row */}
             <div className='
                 flex items-center gap-2 w-full bg-gray-900 rounded-full px-3 py-2 sm:py-3
-                overflow-hidden flex-nowrap'
+                flex-nowrap'
             >
                 {/* Emoji + File */}
                 <div className='flex items-center gap-2 flex-shrink-0'>

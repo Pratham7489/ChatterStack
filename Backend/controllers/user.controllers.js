@@ -276,3 +276,64 @@ export const updateprofileImage = async (req, res) => {
       });  
     }
 };
+
+export const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found!" });
+        }
+
+        // Cloudinary se asli Profile Image udao taaki storage bache
+        if (user.profileImagePublicId) {
+            await coludinary.uploader.destroy(user.profileImagePublicId);
+        }
+
+        // SOFT DELETE (Data overwrite, DB se permanently delete NAHI karna)
+        const randomString = Math.random().toString(36).slice(-8); 
+        
+        user.username = "Deleted User";
+        user.name = "Deleted User"; 
+        user.email = `deleted_${randomString}@deleted.com`; 
+        user.password = await bcrypt.hash(randomString, 8); 
+        user.profileImage = ""; 
+        user.profileImagePublicId = "";
+        user.bio = "This account has been deleted."; 
+        user.phone = ""; 
+        user.website = ""; 
+
+        // SAVE kiya hai, DELETE nahi!
+        await user.save(); 
+
+        // Real-time update bhej rahe hain baaki doston ko
+        if (io) {
+            io.emit("userAnonymized", {
+                userId: userId.toString(),
+                username: "Deleted User",
+                profileImage: ""
+            });
+        }
+
+        // Jisne account delete kiya hai, uski Cookie Clear (Logout) kar do
+        res.cookie("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            expires: new Date(0),
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Account deleted successfully!"
+        });
+
+    } catch (error) {
+        console.error("Error in deleting account:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while deleting account!"
+        });
+    }
+};
