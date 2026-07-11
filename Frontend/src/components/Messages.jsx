@@ -177,7 +177,7 @@ const Messages = () => {
             )}
 
             {/* Selection Action Bar */}
-            {selectionMode && (
+           {selectionMode && (
               <div className='flex items-center justify-between bg-gray-500 text-white'>
                 <div className='flex items-center gap-4'>
                   <button onClick={handleClearSelection} className='hover:bg-gray-400 px-3 py-1.5 rounded-full'>
@@ -189,20 +189,21 @@ const Messages = () => {
                 </div>
 
                 <div className='flex items-center gap-2'>
+                  {/* NAYA LOGIC: Pencil tabhi dikhega jab msg text ho AUR sender current user ho */}
                   {selectedMessages.size === 1 && (() => {
                     const id = [...selectedMessages][0];
                     const m = messages.find(x => x._id === id);
-                    return m && !m.mediaUrl;
+                    return m && !m.mediaUrl && m.senderId === authUser?._id; // <-- YAHAN SENDER CHECK ADD KIYA
                   })() && (
                     <Pencil 
                       onClick={handleEditMessage}
-                      className='text-white mx-4'
+                      className='text-white mx-4 cursor-pointer hover:text-indigo-300'
                     />
                      )}
 
                     <Trash 
                       onClick={handleDeleteSelected}
-                      className='text-white'
+                      className='text-white cursor-pointer hover:text-red-300'
                     />
                 </div>
               </div>
@@ -314,17 +315,16 @@ const Messages = () => {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Edit Bar (Shows only when editing a message) */}
-            {editingMessage && (
+           {/* Agar edit mode me hai toh sirf EditBar dikhao, warna ChatInput dikhao */}
+            {editingMessage ? (
                 <EditBar
                   key={editingMessage._id}
                   message={editingMessage}
                   onCancel={() => setEditingMessage(null)}
                 />
+            ) : (
+                <ChatInput />
             )}
-
-            {/* Input */}  
-            <ChatInput />
 
             {/* Media Modal */}
             {selectedMedia && (
