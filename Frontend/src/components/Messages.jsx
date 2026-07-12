@@ -160,7 +160,7 @@ const Messages = () => {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-gray-900 w-full overflow-hidden">
+    <div className="flex flex-col h-full bg-gray-900 w-full overflow-hidden relative">
       {/* Header */}
       {selectedUser && (
         <div className="flex-shrink-0 flex items-center gap-3 p-3 md:p-4 border-b border-gray-700 bg-gray-800 z-10">

@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Mail, Lock, User, ArrowLeft, Share2 } from "lucide-react";
 import toast from "react-hot-toast";
+import useKeyboardAvoidance from "../hooks/useKeyboardAvoidance";
 
 const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchView }) => {    
   
+    const emailRef = useRef(null);
+    const passRef = useRef(null);
+    useKeyboardAvoidance(emailRef);
+    useKeyboardAvoidance(passRef);
+
     // Sharing Logic
     const handleInvite = async () => {
         const inviteLink = "https://chatter-stack.vercel.app/register"; 
@@ -40,6 +46,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                         <Mail size={20} />
                     </span>
                     <input
+                        ref={emailRef}
                         type="email" 
                         name="email" 
                         placeholder="Email Address" 
@@ -62,6 +69,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                         <Lock size={20} />
                     </span>
                     <input
+                        ref={passRef}
                         type="password" 
                         name="password" 
                         placeholder="Password" 
@@ -133,6 +141,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                         <Mail size={20} />
                     </span>
                     <input
+                        ref={emailRef}
                         type="email" 
                         name="email" 
                         placeholder="Email Address" 
@@ -155,6 +164,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                         <Lock size={20} />
                     </span>
                     <input
+                        ref={passRef}
                         type="password" 
                         name="password" 
                         placeholder="Password" 
