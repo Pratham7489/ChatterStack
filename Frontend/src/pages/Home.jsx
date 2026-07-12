@@ -25,14 +25,19 @@ const Home = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar />
+    // 100dvh zaruri hai mobile safe area ke liye
+    <div className="flex h-[100dvh] bg-gray-900 text-white overflow-hidden">
+      
+      {/* SIDEBAR: Mobile par tabhi dikhega jab koi user select NAHI hoga. Desktop par hamesha dikhega. */}
+      <div className={`h-full w-full md:w-auto ${selectedUser ? "hidden md:block" : "block"}`}>
+        <Sidebar />
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 rounded-xl flex flex-col mx-auto gap-6 overflow-auto">
+      {/* MAIN CONTENT: Mobile par tabhi dikhega jab user select HOGA. Desktop par hamesha dikhega. */}
+      <main className={`flex-1 flex-col h-full overflow-hidden ${!selectedUser ? "hidden md:flex" : "flex w-full"}`}>
         {renderContent()}
       </main>
+      
     </div>
   );
 };
