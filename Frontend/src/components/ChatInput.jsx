@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { CloudUpload, Send, X } from 'lucide-react'
 import EmojiPicker from 'emoji-picker-react';
 import useChatStore from "../store/useChatStore";
-import useKeyboardAvoidance from "../hooks/useKeyboardAvoidance";
 
 const ChatInput = () => {
     const { sendMessage, selectedUser } = useChatStore();
@@ -12,7 +11,6 @@ const ChatInput = () => {
     const [showEmoji, setShowEmoji] = useState(false); 
     const pickerRef = useRef(); 
     const inputRef = useRef(null);
-    useKeyboardAvoidance(inputRef);
 
     const onEmojiClick = (emojiData) => {
         setMessage((prev) => prev + emojiData.emoji);
