@@ -1,15 +1,9 @@
-import React, { useRef } from "react";
-import useKeyboardAvoidance from "../hooks/useKeyboardAvoidance";
+import React from "react";
 import { Mail, Lock, User, ArrowLeft, Share2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchView }) =>
-{    
-    const emailRef = useRef(null);
-    const passRef = useRef(null);
-    useKeyboardAvoidance(emailRef);
-    useKeyboardAvoidance(passRef);
-
+const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchView }) => {    
+  
     // Sharing Logic
     const handleInvite = async () => {
         const inviteLink = "https://chatter-stack.vercel.app/register"; 
@@ -45,8 +39,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <Mail size={20} />
                     </span>
-                    <input 
-                        ref={emailRef}
+                    <input
                         type="email" 
                         name="email" 
                         placeholder="Email Address" 
@@ -68,8 +61,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <Lock size={20} />
                     </span>
-                    <input 
-                        ref={passRef}
+                    <input
                         type="password" 
                         name="password" 
                         placeholder="Password" 
@@ -140,8 +132,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <Mail size={20} />
                     </span>
-                    <input 
-                        ref={emailRef}
+                    <input
                         type="email" 
                         name="email" 
                         placeholder="Email Address" 
@@ -163,8 +154,7 @@ const AuthForm = ({ view, formData, errors, handleChange, handleSubmit, switchVi
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <Lock size={20} />
                     </span>
-                    <input 
-                        ref={passRef}
+                    <input
                         type="password" 
                         name="password" 
                         placeholder="Password" 
