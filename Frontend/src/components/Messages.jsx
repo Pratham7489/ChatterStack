@@ -163,38 +163,42 @@ const Messages = () => {
   return (
     <div className="flex flex-col h-full bg-gray-900 w-full overflow-hidden relative">
       {/* Header */}
-      {/* Header */}
       {selectedUser && (
         <div className="flex-shrink-0 flex items-center justify-between p-3 md:p-4 border-b border-gray-700 bg-gray-800 z-10">
-          
+            
           {/* LEFT SIDE: Back Button (Sirf Mobile par dikhega) */}
           <div className="flex items-center">
-             <button 
-                onClick={() => setSelectedUser(null)}
-                className="md:hidden p-2 -ml-2 mr-2 text-gray-300 hover:text-white rounded-full hover:bg-gray-700 transition-colors"
-             >
-                <ArrowLeft size={24} />
-             </button>
+            <button
+              // Ab setSelectedUser(null) ki jagah hum browser ko back jane bolenge,
+              // jo automatically humare Home.jsx wale logic ko trigger kar dega.
+              onClick={() => window.history.back()}
+              className="md:hidden p-2 -ml-2 mr-2 text-gray-300 hover:text-white rounded-full hover:bg-gray-700 transition-colors"
+            >
+              <ArrowLeft size={24} />
+            </button>
           </div>
 
           {/* RIGHT SIDE: Name, Status & Profile Image */}
           <div className="flex items-center gap-3">
-             <div className="flex flex-col items-end"> {/* items-end se text right align hoga */}
-                <span className="font-semibold text-white text-sm sm:text-base">
-                  {selectedUser?.username}
-                </span>
-                <span className="text-xs text-green-400">
-                  {onlineUsers?.includes(selectedUser?._id) ? "online" : "offline"}
-                </span>
-             </div>
-             <ProfileImage
-                user={selectedUser}
-                className="w-10 h-10 md:w-12 md:h-12"
-                authUser={authUser}
-                onlineUsers={onlineUsers}
-             />
+            <div className="flex flex-col items-end">
+              {" "}
+              {/* items-end se text right align hoga */}
+              <span className="font-semibold text-white text-sm sm:text-base">
+                {selectedUser?.username}
+              </span>
+              <span className="text-xs text-green-400">
+                {onlineUsers?.includes(selectedUser?._id)
+                  ? "online"
+                  : "offline"}
+              </span>
+            </div>
+            <ProfileImage
+              user={selectedUser}
+              className="w-10 h-10 md:w-12 md:h-12"
+              authUser={authUser}
+              onlineUsers={onlineUsers}
+            />
           </div>
-
         </div>
       )}
 

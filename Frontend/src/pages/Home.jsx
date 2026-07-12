@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useEffect } from "react";
 import Sidebar from "../components/Sidebar"
 import useChatStore from "../store/useChatStore";
 import EmptyChat from "../components/EmptyChat";
@@ -6,8 +6,26 @@ import Messages from "../components/Messages";
 import Profile from "../components/Profile";
 
 const Home = () => {
-  const {selectedUser} = useChatStore()
+  const {selectedUser, setSelectedUser} = useChatStore()
 
+  // MOBILE BACK BUTTON LOGIC
+  useEffect(() => {
+    // Jab koi user select ho (Chat khule), toh history mein ek entry daalo
+    if (selectedUser) {
+      window.history.pushState({ chatOpen: true }, "");
+    }
+
+    // Jab user mobile ka back button dabaye, toh ye function chalega
+    const handlePopState = () => {
+      if (selectedUser) {
+        setSelectedUser(null); // Chat band karke list dikhao
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [selectedUser, setSelectedUser]);
+  
   const renderContent = () => {
 
      //  If no user selected, show EmptyChat
